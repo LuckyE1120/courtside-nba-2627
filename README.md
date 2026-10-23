@@ -4,7 +4,7 @@
 
 [打开网站](https://luckye1120.github.io/courtside-nba-2627/)
 
-数据直接从 ESPN 公开比分接口读取，网站在打开且可见时每 60 秒刷新一次；ESPN 数据可能延迟或暂时不可用。每日总结仅根据比分和球员得分等已验证字段生成。本站非 NBA 官方网站。
+每日场次优先从仓库内的赛季快照显示，可按球队、对手和北京时间日期查找具体比赛。ESPN 公开比分接口在页面打开且可见时每 60 秒更新一次比分。打开已开始的单场详情时，页面另行获取球队命中率、篮板、助攻、失误和球员技术统计；未开赛或接口暂不可用时会明确提示。实时接口不可用时仍可查询快照中的场次，页面会提示比分可能延迟。每日总结仅根据比分和球员得分等已验证字段生成。本站非 NBA 官方网站。
 
 ## 本地运行
 
@@ -17,4 +17,4 @@ npm run dev
 
 ## 发布到 GitHub Pages
 
-GitHub Pages 使用 `gh-pages` 分支根目录。源码在 `main` 分支；更新网站时运行 `npm run build`，再把 `out/` 文件和 `.nojekyll` 提交推送至 `gh-pages`。Pages 会在该分支更新后重新发布。
+GitHub Pages 使用 `gh-pages` 分支根目录。源码在 `main` 分支；赛程更新时运行 `npm run build:schedule`，然后运行 `npm run build`，再把 `out/` 文件和 `.nojekyll` 提交推送至 `gh-pages`。Pages 会在该分支更新后重新发布。
