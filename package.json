@@ -11,7 +11,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "build:schedule": "python3 scripts/build_schedule.py"
+    "build:schedule": "python3 scripts/build_schedule.py",
+    "cache:logos": "python3 scripts/cache_logos.py"
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
