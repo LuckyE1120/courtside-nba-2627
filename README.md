@@ -13,4 +13,8 @@ npm ci
 npm run dev
 ```
 
-打开 http://localhost:3000/courtside-nba-2627/ 。GitHub Pages 部署由 `.github/workflows/deploy.yml` 在推送至 `main` 时自动执行。
+打开 http://localhost:3000/courtside-nba-2627/ 。
+
+## 发布到 GitHub Pages
+
+GitHub Pages 使用 `gh-pages` 分支根目录。源码在 `main` 分支；更新网站时运行 `npm run build`，再把 `out/` 文件和 `.nojekyll` 提交推送至 `gh-pages`。Pages 会在该分支更新后重新发布。
