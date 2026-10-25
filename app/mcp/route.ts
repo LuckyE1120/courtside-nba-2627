@@ -20,5 +20,5 @@ export async function POST(request:Request){
    return Response.json({jsonrpc:'2.0',id,result:{content:[{type:'text',text:JSON.stringify(result)}]}});
   }
   return Response.json({jsonrpc:'2.0',id,error:{code:-32601,message:'Method not found'}});
- }catch{return Response.json({jsonrpc:'2.0',id,result:{content:[{type:'text',text:'日记服务暂时不可用'}],isError:true}})}
+ }catch(error){const message=error instanceof Error?error.message:'日记服务暂时不可用';return Response.json({jsonrpc:'2.0',id,result:{content:[{type:'text',text:message}],isError:true}})}
 }

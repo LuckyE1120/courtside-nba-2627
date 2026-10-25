@@ -27,7 +27,7 @@ export async function generateDiary(userId:string,period:DiaryPeriod,from:string
  const selected=gamesInPeriod(records,from,to);if(!selected.length)return {status:'empty'};
  if(!env.OPENAI_API_KEY)return {status:'missing_key'};
  const result=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${env.OPENAI_API_KEY}`},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-5-mini',instructions:'你是一名严谨的中文体育日记编辑。只根据输入中已记录的事实写作，不捏造比赛过程、球员表现或观众经历。',input:diaryPrompt(selected,from,to),max_output_tokens:1000})});
- if(!result.ok)throw new Error(`AI service returned ${result.status}`);
+ if(!result.ok){const failure=await result.json().catch(()=>({})) as {error?:{code?:string}};if(failure.error?.code==='credit_balance_exhausted'||failure.error?.code==='insufficient_quota')throw new Error('OpenAI API 额度已用尽，请在 OpenAI Platform 账单页面补充额度。');throw new Error(`AI 服务暂时不可用（HTTP ${result.status}）`)}
  const output=await result.json() as {output?:{content?:{type?:string;text?:string}[]}[]};
  const text=output.output?.flatMap(item=>item.content||[]).filter(item=>item.type==='output_text').map(item=>item.text||'').join('\n').trim();
  if(!text)throw new Error('AI service returned no text');
