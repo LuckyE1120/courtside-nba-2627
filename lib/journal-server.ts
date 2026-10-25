@@ -2,7 +2,7 @@ import {env} from 'cloudflare:workers';
 import {and,eq,gte,lte} from 'drizzle-orm';
 import {getDb} from '../db';
 import {diaries,journalSettings,watchedGames} from '../db/schema';
-import {dateInChina,diaryPrompt,gamesInPeriod,periodBounds,type DiaryPeriod,type JournalData,type WatchedGame} from './journal';
+import {dateInChina,diaryPrompt,duePeriod,gamesInPeriod,type DiaryPeriod,type JournalData,type WatchedGame} from './journal';
 
 export async function loadJournal(userId:string):Promise<JournalData>{
  const db=getDb();
@@ -38,9 +38,7 @@ export async function generateDiary(userId:string,period:DiaryPeriod,from:string
 export async function generateDueDiaries(userId:string,today:string){
  const settings=await getDb().select().from(journalSettings).where(eq(journalSettings.userId,userId)).limit(1);
  if(settings[0]&&!settings[0].autoEnabled)return {status:'disabled'};
- const period=settings[0].frequency==='month'?'month':'week';
- const yesterday=new Date(today+'T12:00:00Z');yesterday.setUTCDate(yesterday.getUTCDate()-1);
- const anchor=yesterday.toISOString().slice(0,10);const {from,to}=periodBounds(anchor,period);
- if(to>=today)return {status:'not_due'};
- return generateDiary(userId,period,from,to,false);
+ const period=settings[0]?.frequency==='month'?'month':'week';
+ const due=duePeriod(today,period);if(!due)return {status:'not_due'};
+ return generateDiary(userId,period,due.from,due.to,false);
 }
