@@ -8,7 +8,7 @@ export default async function handler(request: Request): Promise<Response> {
   catch (error) { console.error('Journal authentication failed:', error); return Response.json({ error: '登录验证暂不可用' }, { status: 503 }); }
   if (!user) { console.warn('Journal request has no authenticated user'); return Response.json({ error: '请先登录' }, { status: 401 }); }
   if (request.method === 'GET') {
-    try { return Response.json({ ...await loadJournal(user.id), aiReady: !!process.env.OPENAI_API_KEY }); }
+    try { return Response.json({ ...await loadJournal(user.id), aiReady: !!process.env.DEEPSEEK_API_KEY }); }
     catch (error) { console.error('Journal load failed:', error); return Response.json({ error: '云端记录读取失败' }, { status: 503 }); }
   }
   if (request.method !== 'POST') return new Response(null, { status: 405 });
