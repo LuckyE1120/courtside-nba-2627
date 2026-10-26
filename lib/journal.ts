@@ -24,7 +24,8 @@ export function dateInChina(iso:string){return new Intl.DateTimeFormat('en-CA',{
 export function gamesInPeriod(records:WatchedGame[],from:string,to:string){return records.filter(record=>{const date=dateInChina(record.date);return date>=from&&date<=to}).sort((a,b)=>a.date.localeCompare(b.date));}
 export function diaryPrompt(records:WatchedGame[],from:string,to:string):string{
  const lines=records.map(record=>{const score=record.awayScore!==null&&record.homeScore!==null?`${record.awayScore}:${record.homeScore}`:'比分未记录';return `- ${dateInChina(record.date)} ${record.away} vs ${record.home}，${score}；心情：${record.mood||'未填写'}；我的感受：${record.note.trim()||'未填写'}`});
- return `请根据以下真实观赛记录，写一篇中文第一人称 NBA 观赛日记，时间范围 ${from} 至 ${to}。控制在 250 至 400 字。只使用记录里的事实和用户写下的感受，不要虚构比赛过程、球员表现或用户经历；心情未填写时不要推断。先给一个自然的标题，再写两到三段正文。\n\n${lines.join('\n')}`;
+ const hasNotes=records.some(record=>record.note.trim());
+ return `请根据以下真实观赛记录，写一篇中文第一人称 NBA 观赛日记，时间范围 ${from} 至 ${to}。${hasNotes?'约 200 至 350 字':'约 80 至 150 字；素材很少时宁可更短'}。只写已记录的比赛、比分、心情和本人感受；没有记录的细节一律省略。不要推测赛况、气氛、观赛体验或其他日期发生了什么，不要用“应该”“想必”等猜测语气，也不要反复解释哪些字段没有填写。第一行写简短标题，后面写一到两段正文；输出纯文本，不使用 Markdown 标记。\n\n${lines.join('\n')}`;
 }
 
 export function duePeriod(today:string,frequency:DiaryPeriod):{from:string;to:string}|null{

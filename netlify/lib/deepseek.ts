@@ -5,7 +5,7 @@ export async function requestDiaryText(key: string, prompt: string, model = 'dee
     body: JSON.stringify({
       model,
       messages: [
-        { role: 'system', content: '你是一名严谨的中文体育日记编辑。只根据输入中已记录的事实写作，不捏造比赛过程、球员表现或观众经历。' },
+        { role: 'system', content: '你是一名严谨的中文体育日记编辑。只根据输入中已记录的事实写作，不捏造比赛过程、球员表现或观众经历。素材有限时保持简短，不为了字数编造或推测。只输出纯文本。' },
         { role: 'user', content: prompt },
       ],
       thinking: { type: 'disabled' },
