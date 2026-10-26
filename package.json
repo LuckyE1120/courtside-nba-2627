@@ -15,6 +15,8 @@
     "cache:logos": "python3 scripts/cache_logos.py"
   },
   "dependencies": {
+    "@netlify/blobs": "11.1.5",
+    "@netlify/identity": "^2.0.0",
     "lucide-react": "^1.31.0",
     "next": "16.3.4",
     "react": "19.2.6",
@@ -25,6 +27,7 @@
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "netlify-cli": "^26.0.0",
     "typescript": "5.9.3"
   }
 }

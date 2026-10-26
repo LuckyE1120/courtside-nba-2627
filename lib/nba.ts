@@ -11,7 +11,7 @@ export function recap(g:Game){const [a,b]=g.teams;if(!a||!b)return '';if(!g.comp
 type SeasonSnapshot={generatedAt:string;games:Game[]};
 let snapshotPromise:Promise<SeasonSnapshot>|null=null;
 async function getSnapshot():Promise<SeasonSnapshot>{
- if(!snapshotPromise)snapshotPromise=fetch('/courtside-nba-2627/season-2026-27.json').then(async r=>{if(!r.ok)throw new Error('赛季快照不可用');const d=await r.json() as SeasonSnapshot;if(!Array.isArray(d.games))throw new Error('赛季快照格式异常');return d}).catch(e=>{snapshotPromise=null;throw e});
+ if(!snapshotPromise)snapshotPromise=fetch('/season-2026-27.json').then(async r=>{if(!r.ok)throw new Error('赛季快照不可用');const d=await r.json() as SeasonSnapshot;if(!Array.isArray(d.games))throw new Error('赛季快照格式异常');return d}).catch(e=>{snapshotPromise=null;throw e});
  return snapshotPromise;
 }
 export async function getSnapshotDay(date:string):Promise<Day|null>{

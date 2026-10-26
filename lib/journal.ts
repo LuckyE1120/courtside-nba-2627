@@ -26,3 +26,9 @@ export function diaryPrompt(records:WatchedGame[],from:string,to:string):string{
  const lines=records.map(record=>{const score=record.awayScore!==null&&record.homeScore!==null?`${record.awayScore}:${record.homeScore}`:'比分未记录';return `- ${dateInChina(record.date)} ${record.away} vs ${record.home}，${score}；心情：${record.mood||'未填写'}；我的感受：${record.note.trim()||'未填写'}`});
  return `请根据以下真实观赛记录，写一篇中文第一人称 NBA 观赛日记，时间范围 ${from} 至 ${to}。控制在 250 至 400 字。只使用记录里的事实和用户写下的感受，不要虚构比赛过程、球员表现或用户经历；心情未填写时不要推断。先给一个自然的标题，再写两到三段正文。\n\n${lines.join('\n')}`;
 }
+
+export function duePeriod(today:string,frequency:DiaryPeriod):{from:string;to:string}|null{
+ const yesterday=new Date(today+'T12:00:00Z');yesterday.setUTCDate(yesterday.getUTCDate()-1);
+ const bounds=periodBounds(yesterday.toISOString().slice(0,10),frequency);
+ return bounds.to<today?bounds:null;
+}
