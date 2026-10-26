@@ -1,6 +1,7 @@
 import { getUser } from '@netlify/identity';
 import { MOODS, type WatchedGame } from '../../lib/journal';
 import { loadJournal, updateJournal } from '../lib/journal-store';
+import { MAX_PHOTOS_PER_GAME, PHOTO_ID_PATTERN } from '../../lib/photo';
 
 export default async function handler(request: Request): Promise<Response> {
   let user;
@@ -27,6 +28,7 @@ export default async function handler(request: Request): Promise<Response> {
       typeof record.date !== 'string' || !/^20\d\d-\d\d-\d\dT/.test(record.date) ||
       typeof record.away !== 'string' || typeof record.home !== 'string' ||
       typeof record.note !== 'string' || record.note.length > 1000 ||
+      (record.photos !== undefined && (!Array.isArray(record.photos) || record.photos.length > MAX_PHOTOS_PER_GAME || !record.photos.every(id => typeof id === 'string' && PHOTO_ID_PATTERN.test(id)))) ||
       !(!record.mood || MOODS.includes(record.mood))) return Response.json({ error: '记录格式无效' }, { status: 400 });
     return Response.json(await updateJournal(user.id, data => ({
       ...data,

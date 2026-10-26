@@ -1,20 +1,20 @@
 import type {Game} from './nba';
 
-export type Mood='激动'|'开心'|'紧张'|'平静'|'失落';
-export type WatchedGame={gameId:string;date:string;away:string;home:string;awayScore:number|null;homeScore:number|null;mood:Mood|null;note:string;updatedAt:string};
+export type Mood='激动'|'开心'|'紧张'|'平静'|'失落'|'热血';
+export type WatchedGame={gameId:string;date:string;away:string;home:string;awayScore:number|null;homeScore:number|null;mood:Mood|null;note:string;photos?:string[];updatedAt:string};
 export type DiaryPeriod='week'|'month';
 export type Diary={id:string;period:DiaryPeriod;from:string;to:string;text:string;gameIds:string[];createdAt:string;source:'ai'|'draft'};
 export type JournalData={version:1;watched:WatchedGame[];diaries:Diary[];frequency:DiaryPeriod};
 export const JOURNAL_KEY='courtside-journal-v1';
 export const EMPTY_JOURNAL:JournalData={version:1,watched:[],diaries:[],frequency:'week'};
-export const MOODS:Mood[]=['激动','开心','紧张','平静','失落'];
+export const MOODS:Mood[]=['激动','开心','紧张','平静','失落','热血'];
 
 export function readJournal():JournalData{
  try{const raw=JSON.parse(localStorage.getItem(JOURNAL_KEY)||'null');if(raw?.version===1&&Array.isArray(raw.watched)&&Array.isArray(raw.diaries))return {...EMPTY_JOURNAL,...raw,frequency:raw.frequency==='month'?'month':'week'};}catch{}
  return {...EMPTY_JOURNAL};
 }
 export function saveJournal(data:JournalData){localStorage.setItem(JOURNAL_KEY,JSON.stringify(data));}
-export function watchedFromGame(game:Game):WatchedGame{return {gameId:game.id,date:game.date,away:game.teams[0].name,home:game.teams[1].name,awayScore:game.teams[0].score,homeScore:game.teams[1].score,mood:null,note:'',updatedAt:new Date().toISOString()};}
+export function watchedFromGame(game:Game):WatchedGame{return {gameId:game.id,date:game.date,away:game.teams[0].name,home:game.teams[1].name,awayScore:game.teams[0].score,homeScore:game.teams[1].score,mood:null,note:'',photos:[],updatedAt:new Date().toISOString()};}
 export function periodBounds(date:string,period:DiaryPeriod):{from:string;to:string}{
  const d=new Date(date+'T12:00:00Z');
  if(period==='week'){const weekday=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-weekday);const from=d.toISOString().slice(0,10);d.setUTCDate(d.getUTCDate()+6);return {from,to:d.toISOString().slice(0,10)};}
