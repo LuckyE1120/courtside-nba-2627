@@ -28,7 +28,8 @@ export function diaryPrompt(records:WatchedGame[],from:string,to:string):string{
 }
 
 export function duePeriod(today:string,frequency:DiaryPeriod):{from:string;to:string}|null{
- const yesterday=new Date(today+'T12:00:00Z');yesterday.setUTCDate(yesterday.getUTCDate()-1);
- const bounds=periodBounds(yesterday.toISOString().slice(0,10),frequency);
- return bounds.to<today?bounds:null;
+ const current=periodBounds(today,frequency);
+ const dayBeforeCurrent=new Date(current.from+'T12:00:00Z');
+ dayBeforeCurrent.setUTCDate(dayBeforeCurrent.getUTCDate()-1);
+ return periodBounds(dayBeforeCurrent.toISOString().slice(0,10),frequency);
 }
