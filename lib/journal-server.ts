@@ -15,6 +15,7 @@ export async function loadJournal(userId:string):Promise<JournalData>{
 }
 export async function saveWatched(userId:string,record:WatchedGame){
  const day=dateInChina(record.date);const db=getDb();
+ await db.insert(journalSettings).values({userId,frequency:'week',autoEnabled:true,updatedAt:new Date().toISOString()}).onConflictDoNothing();
  await db.insert(watchedGames).values({id:`${userId}:${record.gameId}`,userId,gameId:record.gameId,date:record.date,day,away:record.away,home:record.home,awayScore:record.awayScore,homeScore:record.homeScore,mood:record.mood,note:record.note,updatedAt:new Date().toISOString()}).onConflictDoUpdate({target:watchedGames.id,set:{date:record.date,day,away:record.away,home:record.home,awayScore:record.awayScore,homeScore:record.homeScore,mood:record.mood,note:record.note,updatedAt:new Date().toISOString()}});
 }
 export async function removeWatched(userId:string,gameId:string){await getDb().delete(watchedGames).where(and(eq(watchedGames.userId,userId),eq(watchedGames.gameId,gameId)))}
