@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { afterEach, test } from 'node:test';
-import { requestDiaryText } from '../netlify/lib/deepseek.ts';
+import { requestDiaryText } from '../supabase/functions/journal-generate/logic.ts';
 
 const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
