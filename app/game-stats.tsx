@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import type {Game,Team} from '../lib/nba';
+import {playerName} from '../lib/player-names';
 
 type Stat={name:string;displayValue:string};
 type Player={name:string;stats:Record<string,string>};
@@ -24,7 +25,7 @@ function parseBoxscore(raw:any):BoxTeam[]{
  return teams;
 }
 
-function fallback(team:Team){return team.leaders.filter(l=>l.player).map(l=>`${l.player} · ${l.name==='points'?'得分':l.name==='rebounds'?'篮板':l.name==='assists'?'助攻':l.name} ${l.value}`).join('　');}
+function fallback(team:Team){return team.leaders.filter(l=>l.player).map(l=>`${playerName(l.player)} · ${l.name==='points'?'得分':l.name==='rebounds'?'篮板':l.name==='assists'?'助攻':l.name} ${l.value}`).join('　');}
 
 export default function GameStats({game}:{game:Game}){
  const [box,setBox]=useState<BoxTeam[]|null>(null),[loading,setLoading]=useState(false),[failed,setFailed]=useState(false);
@@ -47,7 +48,7 @@ export default function GameStats({game}:{game:Game}){
   {game.state==='pre'?<p className="game-stat-note">比赛开始后公布球队和球员数据。</p>:<>
    {loading&&<p className="game-stat-note" role="status">正在获取技术统计…</p>}
    {hasTeamStats&&<div className="team-comparison"><h4>球队对比</h4><div className="comparison-head"><span>{game.teams[0].name}</span><span>统计项</span><span>{game.teams[1].name}</span></div>{fields.map(([key,label,suffix])=><div className="comparison-row" key={key}><b>{teamBoxes[0]?.stats.find(s=>s.name===key)?.displayValue??'—'}{teamBoxes[0]?.stats.some(s=>s.name===key)?suffix:''}</b><span>{label}</span><b>{teamBoxes[1]?.stats.find(s=>s.name===key)?.displayValue??'—'}{teamBoxes[1]?.stats.some(s=>s.name===key)?suffix:''}</b></div>)}</div>}
-   {hasPlayers&&game.teams.map((team,i)=>{const players=teamBoxes[i]?.players||[];return players.length?<div className="player-box" key={team.id}><h4>{team.name}球员数据</h4><p className="player-table-hint">左右滑动查看罚球、抢断等完整数据 · 命中数-出手数</p><div className="player-table-wrap" role="region" aria-label={`${team.name}球员技术统计`} tabIndex={0}><table><thead><tr><th scope="col">球员</th>{playerFields.map(([key,label])=><th scope="col" key={key} title={key}>{label}</th>)}</tr></thead><tbody>{players.map((player,index)=><tr key={`${player.name}-${index}`}><th scope="row">{player.name}</th>{playerFields.map(([key])=><td key={key}>{player.stats[key]??'—'}</td>)}</tr>)}</tbody></table></div></div>:null})}
+   {hasPlayers&&game.teams.map((team,i)=>{const players=teamBoxes[i]?.players||[];return players.length?<div className="player-box" key={team.id}><h4>{team.name}球员数据</h4><p className="player-table-hint">左右滑动查看罚球、抢断等完整数据 · 命中数-出手数</p><div className="player-table-wrap" role="region" aria-label={`${team.name}球员技术统计`} tabIndex={0}><table><thead><tr><th scope="col">球员</th>{playerFields.map(([key,label])=><th scope="col" key={key} title={key}>{label}</th>)}</tr></thead><tbody>{players.map((player,index)=><tr key={`${player.name}-${index}`}><th scope="row" title={player.name}>{playerName(player.name)}</th>{playerFields.map(([key])=><td key={key}>{player.stats[key]??'—'}</td>)}</tr>)}</tbody></table></div></div>:null})}
    {(failed||!loading&&!hasTeamStats&&!hasPlayers)&&<div className="game-stat-note" role="status">技术统计暂未公布或数据源暂不可用。{game.teams.map(team=>fallback(team)).filter(Boolean).length>0&&<div className="stat-leaders">{game.teams.map(team=>{const text=fallback(team);return text?<p key={team.id}><strong>{team.name}</strong> {text}</p>:null})}</div>}</div>}
   </>}
  </section>;

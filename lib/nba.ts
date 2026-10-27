@@ -1,4 +1,5 @@
 import { SITE_BASE } from './paths';
+import { playerName } from './player-names';
 export const TEAMS: Record<string,string> = {ATL:'老鹰',BOS:'凯尔特人',BKN:'篮网',CHA:'黄蜂',CHI:'公牛',CLE:'骑士',DAL:'独行侠',DEN:'掘金',DET:'活塞',GS:'勇士',GSW:'勇士',HOU:'火箭',IND:'步行者',LAC:'快船',LAL:'湖人',MEM:'灰熊',MIA:'热火',MIL:'雄鹿',MIN:'森林狼',NO:'鹈鹕',NOP:'鹈鹕',NY:'尼克斯',NYK:'尼克斯',OKC:'雷霆',ORL:'魔术',PHI:'76人',PHX:'太阳',POR:'开拓者',SAC:'国王',SA:'马刺',SAS:'马刺',TOR:'猛龙',UTAH:'爵士',UTA:'爵士',WSH:'奇才',WAS:'奇才'};
 export const teamOptions = ['ATL','BOS','BKN','CHA','CHI','CLE','DAL','DEN','DET','GS','HOU','IND','LAC','LAL','MEM','MIA','MIL','MIN','NO','NY','OKC','ORL','PHI','PHX','POR','SAC','SA','TOR','UTAH','WSH'];
 export type Team={id:string;abbr:string;name:string;english:string;logo:string;color:string;score:number|null;home:boolean;record:string;quarters:number[];leaders:{name:string;value:number;player:string;image:string}[]};
@@ -8,7 +9,7 @@ export function chinaDate(d=new Date()){return new Intl.DateTimeFormat('en-CA',{
 export function shiftDate(d:string,n:number){return new Date(new Date(d+'T12:00:00Z').getTime()+n*86400000).toISOString().slice(0,10)}
 export const MIN_DATE='2026-10-01', MAX_DATE='2027-06-30';
 export function validDate(d:string){return /^\d{4}-\d{2}-\d{2}$/.test(d)&&d>=MIN_DATE&&d<=MAX_DATE&&!isNaN(Date.parse(d))&&new Date(d).toISOString().slice(0,10)===d}
-export function recap(g:Game){const [a,b]=g.teams;if(!a||!b)return '';if(!g.complete)return g.state==='in'?`${a.name}与${b.name}正在比赛，比分与统计将持续更新。`:`${a.name}客场挑战${b.name}，等待比赛开始。`;if(a.score===null||b.score===null)return '比赛已结束，等待比分更新。';const w=a.score>b.score?a:b,l=w===a?b:a;const margin=w.score!-l.score!;const scorers=[...a.leaders,...b.leaders].filter(x=>x.name==='points').sort((x,y)=>y.value-x.value);const player=scorers[0];const tied=player?scorers.filter(x=>x.value===player.value):[];return `${w.name}以 ${w.score}–${l.score} ${margin<=5?'险胜':'击败'}${l.name}${g.period>4?'，比赛经历加时':''}。${player?`${tied.map(p=>p.player).join(" 与 ")}${tied.length>1?"各":""}拿下 ${player.value} 分，${tied.length>1?"并列":""}领跑本场得分。`:''}`}
+export function recap(g:Game){const [a,b]=g.teams;if(!a||!b)return '';if(!g.complete)return g.state==='in'?`${a.name}与${b.name}正在比赛，比分与统计将持续更新。`:`${a.name}客场挑战${b.name}，等待比赛开始。`;if(a.score===null||b.score===null)return '比赛已结束，等待比分更新。';const w=a.score>b.score?a:b,l=w===a?b:a;const margin=w.score!-l.score!;const scorers=[...a.leaders,...b.leaders].filter(x=>x.name==='points').sort((x,y)=>y.value-x.value);const player=scorers[0];const tied=player?scorers.filter(x=>x.value===player.value):[];return `${w.name}以 ${w.score}–${l.score} ${margin<=5?'险胜':'击败'}${l.name}${g.period>4?'，比赛经历加时':''}。${player?`${tied.map(p=>playerName(p.player)).join(" 与 ")}${tied.length>1?"各":""}拿下 ${player.value} 分，${tied.length>1?"并列":""}领跑本场得分。`:''}`}
 type SeasonSnapshot={generatedAt:string;games:Game[]};
 let snapshotPromise:Promise<SeasonSnapshot>|null=null;
 async function getSnapshot():Promise<SeasonSnapshot>{
