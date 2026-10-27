@@ -1,14 +1,15 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getSupabase, supabaseConfigured } from '../lib/supabase';
 
-export default function AuthPanel({ email, onChange }: { email: string | null; onChange: (email: string | null) => void }) {
+export default function AuthPanel({ email, onChange, openToken = 0 }: { email: string | null; onChange: (email: string | null) => void; openToken?: number }) {
   const [inputEmail, setInputEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => { if (openToken > 0 && !dialog.current?.open) dialog.current?.showModal(); }, [openToken]);
 
   async function submit() {
     setBusy(true); setMessage('');
