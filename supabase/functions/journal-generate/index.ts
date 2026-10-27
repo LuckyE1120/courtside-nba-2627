@@ -44,8 +44,11 @@ Deno.serve(async request => {
   if (origin && !allowedOrigins.has(origin)) return reply({ error: '请求来源无效' }, 403, origin);
   let body: { scheduled?: boolean; period?: Period; from?: string; to?: string };
   try { body = await request.json(); } catch { return reply({ error: '请求格式无效' }, 400, origin); }
-  const cronToken = Deno.env.get('CRON_TOKEN');
-  const isCron = Boolean(cronToken && request.headers.get('x-cron-token') === cronToken && !origin);
+  const cronToken = request.headers.get('x-cron-token');
+  const cronCheck = body.scheduled && !origin && cronToken
+    ? await admin.rpc('verify_journal_cron_token', { supplied_token: cronToken })
+    : null;
+  const isCron = cronCheck?.data === true && !cronCheck.error;
   if (body.scheduled && isCron) {
     const profiles = await admin.from('journal_profiles').select('user_id,frequency');
     if (profiles.error) return reply({ error: '用户列表读取失败' }, 503);
