@@ -1,3 +1,4 @@
+import { SITE_BASE } from './paths';
 export const TEAMS: Record<string,string> = {ATL:'老鹰',BOS:'凯尔特人',BKN:'篮网',CHA:'黄蜂',CHI:'公牛',CLE:'骑士',DAL:'独行侠',DEN:'掘金',DET:'活塞',GS:'勇士',GSW:'勇士',HOU:'火箭',IND:'步行者',LAC:'快船',LAL:'湖人',MEM:'灰熊',MIA:'热火',MIL:'雄鹿',MIN:'森林狼',NO:'鹈鹕',NOP:'鹈鹕',NY:'尼克斯',NYK:'尼克斯',OKC:'雷霆',ORL:'魔术',PHI:'76人',PHX:'太阳',POR:'开拓者',SAC:'国王',SA:'马刺',SAS:'马刺',TOR:'猛龙',UTAH:'爵士',UTA:'爵士',WSH:'奇才',WAS:'奇才'};
 export const teamOptions = ['ATL','BOS','BKN','CHA','CHI','CLE','DAL','DEN','DET','GS','HOU','IND','LAC','LAL','MEM','MIA','MIL','MIN','NO','NY','OKC','ORL','PHI','PHX','POR','SAC','SA','TOR','UTAH','WSH'];
 export type Team={id:string;abbr:string;name:string;english:string;logo:string;color:string;score:number|null;home:boolean;record:string;quarters:number[];leaders:{name:string;value:number;player:string;image:string}[]};
@@ -11,7 +12,7 @@ export function recap(g:Game){const [a,b]=g.teams;if(!a||!b)return '';if(!g.comp
 type SeasonSnapshot={generatedAt:string;games:Game[]};
 let snapshotPromise:Promise<SeasonSnapshot>|null=null;
 async function getSnapshot():Promise<SeasonSnapshot>{
- if(!snapshotPromise)snapshotPromise=fetch('/season-2026-27.json').then(async r=>{if(!r.ok)throw new Error('赛季快照不可用');const d=await r.json() as SeasonSnapshot;if(!Array.isArray(d.games))throw new Error('赛季快照格式异常');return d}).catch(e=>{snapshotPromise=null;throw e});
+ if(!snapshotPromise)snapshotPromise=fetch(`${SITE_BASE}/season-2026-27.json`).then(async r=>{if(!r.ok)throw new Error('赛季快照不可用');const d=await r.json() as SeasonSnapshot;if(!Array.isArray(d.games))throw new Error('赛季快照格式异常');return d}).catch(e=>{snapshotPromise=null;throw e});
  return snapshotPromise;
 }
 export async function getSnapshotDay(date:string):Promise<Day|null>{

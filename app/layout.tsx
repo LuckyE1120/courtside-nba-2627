@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SITE_BASE } from "../lib/paths";
 
 export const metadata: Metadata = {
   title: "Courtside · 2026–27 NBA 赛程与观赛日记",
@@ -8,8 +9,8 @@ export const metadata: Metadata = {
     "codex-preview": "development",
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: `${SITE_BASE}/favicon.svg`,
+    shortcut: `${SITE_BASE}/favicon.svg`,
   },
 };
 

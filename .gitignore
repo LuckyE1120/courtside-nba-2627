@@ -3,7 +3,10 @@ node_modules/
 out/
 *.tsbuildinfo
 .env*
+!.env.example
 .DS_Store
 
 # Local Netlify folder
 .netlify
+
+supabase/.temp/
