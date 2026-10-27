@@ -27,19 +27,19 @@ function parseBoxscore(raw:any):BoxTeam[]{
 
 function fallback(team:Team){return team.leaders.filter(l=>l.player).map(l=>`${playerName(l.player)} · ${l.name==='points'?'得分':l.name==='rebounds'?'篮板':l.name==='assists'?'助攻':l.name} ${l.value}`).join('　');}
 
-export default function GameStats({game}:{game:Game}){
+export default function GameStats({game,refreshKey}:{game:Game;refreshKey?:string}){
  const [box,setBox]=useState<BoxTeam[]|null>(null),[loading,setLoading]=useState(false),[failed,setFailed]=useState(false);
  useEffect(()=>{
   setBox(null);setFailed(false);
   if(game.state==='pre')return;
-  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);setLoading(true);
+ const controller=new AbortController();let active=true;const timeout=setTimeout(()=>controller.abort(),30000);setLoading(true);
   fetch(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=${encodeURIComponent(game.id)}`,{signal:controller.signal})
    .then(async response=>{if(!response.ok)throw new Error('统计暂不可用');return parseBoxscore(await response.json())})
-   .then(data=>{if(!controller.signal.aborted){setBox(data);setFailed(!data.some(t=>t.stats.length||t.players.length))}})
-   .catch(()=>{if(!controller.signal.aborted)setFailed(true)})
-   .finally(()=>{clearTimeout(timeout);if(!controller.signal.aborted)setLoading(false)});
-  return ()=>{clearTimeout(timeout);controller.abort()};
- },[game.id,game.state]);
+   .then(data=>{if(active&&!controller.signal.aborted){setBox(data);setFailed(!data.some(t=>t.stats.length||t.players.length))}})
+   .catch(()=>{if(active)setFailed(true)})
+   .finally(()=>{clearTimeout(timeout);if(active)setLoading(false)});
+  return ()=>{active=false;clearTimeout(timeout);controller.abort()};
+ },[game.id,game.state,game.state==='in'?refreshKey:undefined]);
  const teamBoxes=game.teams.map(team=>box?.find(item=>item.id===team.id));
  const hasTeamStats=teamBoxes.every(item=>item?.stats.length);
  const hasPlayers=teamBoxes.some(item=>item?.players.length);

@@ -75,3 +75,8 @@
 .spotlight-stack .leaders:nth-child(2){border-top:3px solid #7697a9}
 .spotlight-stack .leaders:nth-child(3){border-top:3px solid #839778}
 .spotlight-stack .leaders:nth-child(4){border-top:3px solid #ad8394}
+.record-game-link{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:10px 14px;border-radius:6px;background:#204e38;color:#fff;font-size:11px;font-weight:600}.record-game-link:hover{background:#2d694b;color:#fff}
+.journal-dialog-actions{position:sticky;bottom:-30px;z-index:2;background:#fff;padding-bottom:8px;box-shadow:0 -8px 20px #ffffffd9}
+@media(max-width:950px){.sidebar nav button{min-width:44px;min-height:44px}}
+@media(max-width:680px){.sidebar{gap:6px;padding:12px}.brand>div{font-size:16px}.sidebar nav button{width:44px;min-width:44px;min-height:44px;margin-left:0;padding:10px}.sidebar nav{gap:2px}.journal-dialog-actions{bottom:-22px}}
+.journal-record-search{width:100%;margin-top:15px;padding:10px 12px;border:1px solid #e0e8e0;border-radius:6px;background:#fff;color:#344d3b;font-size:11px}

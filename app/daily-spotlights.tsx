@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import type {Game} from '../lib/nba';
 import {playerName} from '../lib/player-names';
 
@@ -16,9 +16,9 @@ const metrics: {key:Metric;title:string;label:string;unit:string}[]=[
 ];
 const cache=new Map<string,{expiresAt:number;request:Promise<PlayerLine[]>}>();
 
-function loadGame(game:Game):Promise<PlayerLine[]>{
+function loadGame(game:Game,force=false):Promise<PlayerLine[]>{
   const existing=cache.get(game.id);
-  if(existing&&existing.expiresAt>Date.now())return existing.request;
+  if(!force&&existing&&existing.expiresAt>Date.now())return existing.request;
   const request=fetch(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=${encodeURIComponent(game.id)}`,{signal:AbortSignal.timeout(25000)})
     .then(async response=>{if(!response.ok)throw new Error('技术统计暂不可用');return response.json()})
     .then(raw=>{
@@ -43,19 +43,21 @@ function loadGame(game:Game):Promise<PlayerLine[]>{
   return request;
 }
 
-export default function DailySpotlights({games,refreshToken}:{games:Game[];refreshToken:number}){
+export default function DailySpotlights({games,refreshToken,refreshKey}:{games:Game[];refreshToken:number;refreshKey?:string}){
   const key=games.map(game=>game.id).join(',');
   const [state,setState]=useState<State>({key:'',lines:[],loading:false,failedIds:[]});
+  const lastManualRefresh=useRef(refreshToken);
   useEffect(()=>{
     let active=true;
+    const force=lastManualRefresh.current!==refreshToken;
+    lastManualRefresh.current=refreshToken;
     if(!games.length){setState({key,lines:[],loading:false,failedIds:[]});return()=>{active=false}};
     setState({key,lines:[],loading:true,failedIds:[]});
-    Promise.allSettled(games.map(loadGame)).then(results=>{
+    Promise.allSettled(games.map(game=>loadGame(game,force))).then(results=>{
       if(active)setState({key,lines:results.flatMap(result=>result.status==='fulfilled'?result.value:[]),loading:false,failedIds:games.filter((_,index)=>results[index].status==='rejected').map(game=>game.id)});
     });
     return()=>{active=false};
-  // The key changes only when the set of completed games changes; refreshToken retries failed requests.
-  },[key,refreshToken]);
+  },[key,refreshToken,refreshKey]);
 
   const current=state.key===key?state:{key,lines:[],loading:games.length>0,failedIds:[]};
   return <aside className="spotlight-stack" aria-label="每日球员数据榜">

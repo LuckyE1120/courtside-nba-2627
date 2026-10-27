@@ -62,7 +62,7 @@ export default function AuthPanel({ email, onChange, openToken = 0 }: { email: s
             <button className="auth-submit" disabled={busy} type="submit">{busy ? '请稍候…' : mode === 'login' ? '登录观赛日记' : '创建账号'}</button>
           </form>
           <button className="auth-switch" type="button" onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(''); }}>{mode === 'login' ? '第一次来？创建账号' : '已有账号？返回登录'}</button>
-          {mode === 'login' && <small className="auth-footnote">首次登录后，当前浏览器的记录会自动同步。</small>}
+          {mode === 'login' && <small className="auth-footnote">登录后可在观赛日记中查看和保存云端记录。</small>}
         </>}
         {message && <p className="auth-message" role="status">{message}</p>}
       </div>
