@@ -30,3 +30,5 @@ Supabase 免费项目可能因不活跃而暂停；定时生成和登录依赖�
 GitHub Pages 使用 `gh-pages` 分支根目录。源码在 `main` 分支。配置公开 Supabase URL 与 publishable key 后运行 `npm run build`，将 `out/` 和 `.nojekyll` 提交推送至 `gh-pages`。不要提交 DeepSeek Key、Supabase secret key 或用户备份。赛程快照更新可运行 `npm run build:schedule`。
 
 详细产品范围、数据流和验收标准见 [观赛日记 PRD](docs/观赛日记-PRD.md)。
+
+赛程快照通过 GitHub Actions 每天北京时间 10:30 自动重新抓取并发布到 GitHub Pages；页面同时会向 ESPN 请求当前比赛日的最新比分。

@@ -1,0 +1,53 @@
+name: Refresh NBA schedule
+
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: courtside-schedule-deploy
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Refresh published schedule
+        run: python3 scripts/build_schedule.py
+      - name: Save refreshed snapshot
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/season-2026-27.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refresh 2026-27 NBA schedule snapshot'
+            git push origin HEAD:main
+          fi
+      - name: Build website
+        run: |
+          npm ci
+          npm run build
+      - name: Publish GitHub Pages
+        run: |
+          git fetch origin gh-pages
+          git worktree add /tmp/courtside-pages origin/gh-pages
+          rsync -a --delete --exclude=.git --exclude=.nojekyll out/ /tmp/courtside-pages/
+          touch /tmp/courtside-pages/.nojekyll
+          cd /tmp/courtside-pages
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish refreshed NBA schedule'
+            git push origin HEAD:gh-pages
+          fi
