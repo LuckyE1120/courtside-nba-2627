@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { getSupabase, supabaseConfigured } from '../lib/supabase';
 
 export default function AuthPanel({ email, onChange }: { email: string | null; onChange: (email: string | null) => void }) {
@@ -8,6 +8,7 @@ export default function AuthPanel({ email, onChange }: { email: string | null; o
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const dialog = useRef<HTMLDialogElement>(null);
 
   async function submit() {
     setBusy(true); setMessage('');
@@ -27,7 +28,43 @@ export default function AuthPanel({ email, onChange }: { email: string | null; o
     finally { setBusy(false); }
   }
 
-  if (!supabaseConfigured) return <div className="journal-auth"><div><strong>云端日记正在迁移</strong><small>赛程和本地观赛记录可以继续使用；待 Supabase 配置完成后开放登录和照片。</small></div></div>;
-  if (email) return <div className="journal-auth"><span>已登录：{email} · 观赛记录会同步到云端</span><button onClick={async () => { await getSupabase().auth.signOut(); onChange(null); window.location.reload(); }}>退出登录</button></div>;
-  return <div className="journal-auth"><div><strong>{mode === 'login' ? '登录观赛日记' : '创建观赛日记账号'}</strong><small>新站使用 Supabase 登录；第一次使用请注册并验证邮箱。现有浏览器记录会在首次登录后自动同步。</small></div><form onSubmit={event => { event.preventDefault(); void submit(); }}><input type="email" required placeholder="邮箱" aria-label="登录邮箱" value={inputEmail} onChange={event => setInputEmail(event.target.value)}/><input type="password" required minLength={8} placeholder="密码（至少 8 位）" aria-label="登录密码" value={password} onChange={event => setPassword(event.target.value)}/><button disabled={busy} type="submit">{busy ? '请稍候…' : mode === 'login' ? '登录' : '注册'}</button></form><button className="journal-auth-switch" type="button" onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(''); }}>{mode === 'login' ? '首次使用？创建账号' : '已有账号？返回登录'}</button>{message && <small role="status">{message}</small>}</div>;
+  async function signOut() {
+    setBusy(true); setMessage('');
+    try {
+      const { error } = await getSupabase().auth.signOut();
+      if (error) throw error;
+      onChange(null); window.location.reload();
+    } catch (error) { setMessage(error instanceof Error ? error.message : '退出失败，请重试。'); }
+    finally { setBusy(false); }
+  }
+
+  return <>
+    <button className="auth-trigger" type="button" aria-haspopup="dialog" aria-label={email ? `账号：${email}` : '登录或注册'} onClick={() => { setMessage(''); dialog.current?.showModal(); }}>
+      <span className="auth-avatar" aria-hidden="true">{email ? email.charAt(0).toUpperCase() : '◇'}</span>
+      <span className="auth-trigger-label">{email ? '我的账号' : '登录 / 注册'}</span>
+      {email && <span className="auth-online" aria-hidden="true"/>}
+    </button>
+    <dialog ref={dialog} className="auth-dialog" aria-labelledby="auth-dialog-title" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
+      <div className="auth-dialog-body">
+        <button className="auth-close" type="button" aria-label="关闭弹窗" onClick={() => dialog.current?.close()}>×</button>
+        <div className="auth-dialog-mark" aria-hidden="true">◈</div>
+        {!supabaseConfigured ? <><h2 id="auth-dialog-title">云端日记正在迁移</h2><p>赛程和本地观赛记录可以继续使用；云端服务配置完成后开放登录。</p></> : email ? <>
+          <h2 id="auth-dialog-title">我的账号</h2><p>观赛记录与照片会同步到云端。</p>
+          <div className="auth-account"><span className="auth-account-avatar" aria-hidden="true">{email.charAt(0).toUpperCase()}</span><span><strong>{email}</strong><small>已登录 · 云端同步</small></span></div>
+          <button className="auth-signout" type="button" disabled={busy} onClick={() => void signOut()}>{busy ? '请稍候…' : '退出登录'}</button>
+        </> : <>
+          <h2 id="auth-dialog-title">{mode === 'login' ? '欢迎回到场边' : '创建观赛日记账号'}</h2>
+          <p>{mode === 'login' ? '登录后，你的观赛记录和照片会同步到云端。' : '注册并验证邮箱后，就能跨设备保存你的观赛时刻。'}</p>
+          <form className="auth-form" onSubmit={event => { event.preventDefault(); void submit(); }}>
+            <label htmlFor="auth-email">邮箱</label><input id="auth-email" type="email" autoComplete="email" required placeholder="你的邮箱地址" value={inputEmail} onChange={event => setInputEmail(event.target.value)}/>
+            <label htmlFor="auth-password">密码</label><input id="auth-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required minLength={8} placeholder="至少 8 位密码" value={password} onChange={event => setPassword(event.target.value)}/>
+            <button className="auth-submit" disabled={busy} type="submit">{busy ? '请稍候…' : mode === 'login' ? '登录观赛日记' : '创建账号'}</button>
+          </form>
+          <button className="auth-switch" type="button" onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(''); }}>{mode === 'login' ? '第一次来？创建账号' : '已有账号？返回登录'}</button>
+          {mode === 'login' && <small className="auth-footnote">首次登录后，当前浏览器的记录会自动同步。</small>}
+        </>}
+        {message && <p className="auth-message" role="status">{message}</p>}
+      </div>
+    </dialog>
+  </>;
 }
