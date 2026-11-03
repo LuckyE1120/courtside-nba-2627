@@ -34,7 +34,7 @@ export default function GameStats({game,refreshKey}:{game:Game;refreshKey?:strin
   setBox(null);setFailed(false);
   if(game.state==='pre')return;
  const controller=new AbortController();let active=true;const timeout=setTimeout(()=>controller.abort(),30000);setLoading(true);
-  fetch(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=${encodeURIComponent(game.id)}`,{signal:controller.signal})
+  fetch(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=${encodeURIComponent(game.id)}`,{signal:AbortSignal.any([controller.signal,AbortSignal.timeout(8000)])})
    .then(async response=>{if(!response.ok)throw new Error('统计暂不可用');return response.json()})
    .catch(async()=>{const response=await fetch(`${SITE_BASE}/recent-boxscores.json`,{signal:controller.signal,cache:'no-cache'});if(!response.ok)throw new Error('备用统计暂不可用');const cached=await response.json();if(!cached.games?.[game.id])throw new Error('本场统计尚未同步');return cached.games[game.id]})
    .then(parseBoxscore)
