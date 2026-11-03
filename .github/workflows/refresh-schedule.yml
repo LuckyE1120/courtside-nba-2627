@@ -20,10 +20,6 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
       - name: Refresh published schedule
         run: python3 scripts/build_schedule.py
       - name: Save refreshed snapshot
@@ -35,18 +31,13 @@ jobs:
             git commit -m 'Refresh 2026-27 NBA schedule snapshot'
             git push origin HEAD:main
           fi
-      - name: Build website
-        run: |
-          npm ci
-          npm run build
-      - name: Publish GitHub Pages
+      - name: Publish refreshed schedule to GitHub Pages
         run: |
           git fetch origin gh-pages
           git worktree add /tmp/courtside-pages origin/gh-pages
-          rsync -a --delete --exclude=.git --exclude=.nojekyll out/ /tmp/courtside-pages/
-          touch /tmp/courtside-pages/.nojekyll
+          cp public/season-2026-27.json /tmp/courtside-pages/season-2026-27.json
           cd /tmp/courtside-pages
-          git add -A
+          git add season-2026-27.json
           if ! git diff --cached --quiet; then
             git commit -m 'Publish refreshed NBA schedule'
             git push origin HEAD:gh-pages
