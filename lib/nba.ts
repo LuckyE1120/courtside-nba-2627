@@ -11,8 +11,9 @@ export function validDate(d:string){return /^\d{4}-\d{2}-\d{2}$/.test(d)&&d>=MIN
 export function recap(g:Game){const [a,b]=g.teams;if(!a||!b)return '';if(!g.complete)return g.state==='in'?`${a.name}与${b.name}正在比赛，比分与统计将持续更新。`:`${a.name}客场挑战${b.name}，等待比赛开始。`;if(a.score===null||b.score===null)return '比赛已结束，等待比分更新。';const w=a.score>b.score?a:b,l=w===a?b:a;const margin=w.score!-l.score!;return `${w.name}以 ${w.score}–${l.score} ${margin<=5?'险胜':'击败'}${l.name}${g.period>4?'，比赛经历加时':''}。球员表现请查看本场技术统计。`}
 type SeasonSnapshot={generatedAt:string;games:Game[]};
 let snapshotPromise:Promise<SeasonSnapshot>|null=null;
+let snapshotLoadedAt=0;
 async function getSnapshot():Promise<SeasonSnapshot>{
- if(!snapshotPromise)snapshotPromise=fetch(`${SITE_BASE}/season-2026-27.json`).then(async r=>{if(!r.ok)throw new Error('赛季快照不可用');const d=await r.json() as SeasonSnapshot;if(!Array.isArray(d.games))throw new Error('赛季快照格式异常');return d}).catch(e=>{snapshotPromise=null;throw e});
+ if(!snapshotPromise||Date.now()-snapshotLoadedAt>5*60_000){snapshotLoadedAt=Date.now();snapshotPromise=fetch(`${SITE_BASE}/season-2026-27.json`,{cache:'no-cache'}).then(async r=>{if(!r.ok)throw new Error('赛季快照不可用');const d=await r.json() as SeasonSnapshot;if(!Array.isArray(d.games))throw new Error('赛季快照格式异常');return d}).catch(e=>{snapshotPromise=null;throw e});}
  return snapshotPromise;
 }
 export async function getSnapshotDay(date:string):Promise<Day|null>{
